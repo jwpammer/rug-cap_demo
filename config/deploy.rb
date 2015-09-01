@@ -34,6 +34,29 @@ set :deploy_to, "~/apps/#{fetch(:application)}"
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
+namespace :stats do
+  task :uptime do
+    on roles(:all), in: :parallel do |host|
+      uptime = capture(:uptime)
+      puts "#{host.hostname}:\n#{uptime}"
+    end
+  end
+
+  task :procinfo do
+    on roles(:all), in: :parallel do |host|
+      procinfo = capture('cat /proc/cpuinfo')
+      puts "#{host.hostname}:\n#{procinfo}"
+    end
+  end
+
+  task :meminfo do
+    on roles(:all), in: :parallel do |host|
+      meminfo = capture('cat /proc/meminfo')
+      puts "#{host.hostname}:\n#{meminfo}"
+    end
+  end
+end
+
 namespace :deploy do
 
   after :restart, :clear_cache do
