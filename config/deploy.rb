@@ -57,6 +57,41 @@ namespace :stats do
   end
 end
 
+namespace :provision do
+  task :packages do
+    on roles(:all), in: :parallel do
+      execute :sudo, 'apt-get -q -y update'
+      execute :sudo, 'apt-get -q -y upgrade'
+      execute :sudo, 'apt-get install -q -y git nodejs'
+    end
+  end
+
+  task :rvm do
+    on roles(:app), in: :parallel do
+      execute '\curl -sSL https://get.rvm.io | bash'
+      execute 'source .profile && rvm install ruby 2.2.1'
+      execute 'source .profile && gem install bundler'
+    end
+  end
+
+  task :github_ssh do
+    on roles(:app), in: :parallel do
+      set :github_ssk_key, ask('Enter path to Github  SSH key:', `echo $HOME/.ssh/github_rsa`.chomp)
+      upload! fetch(:github_ssk_key), '/home/vagrant/.ssh/github_rsa'
+      execute 'chmod 600 ~/.ssh/github_rsa'
+      execute 'printf "Host github.com\n  User git\n  IdentityFile ~/.ssh/github_rsa" > ~/.ssh/config'
+    end
+  end
+
+  task :all do
+    on roles(:all), in: :parallel do
+      invoke 'provision:packages'
+      invoke 'provision:rvm'
+      invoke 'provision:github_ssh'
+    end
+  end
+end
+
 namespace :deploy do
 
   after :restart, :clear_cache do
