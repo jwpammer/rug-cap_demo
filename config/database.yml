@@ -20,6 +20,10 @@ test:
   <<: *default
   database: db/test.sqlite3
 
+vagrant:
+  <<: *default
+  database: db/vagrant.sqlite3
+
 production:
   <<: *default
   database: db/production.sqlite3
