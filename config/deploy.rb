@@ -35,6 +35,7 @@ set :deploy_to, "~/apps/#{fetch(:application)}"
 # set :keep_releases, 5
 
 namespace :stats do
+  desc 'Print remote server uptime'
   task :uptime do
     on roles(:all), in: :parallel do |host|
       uptime = capture(:uptime)
@@ -42,6 +43,7 @@ namespace :stats do
     end
   end
 
+  desc 'Print remote server processor information'
   task :procinfo do
     on roles(:all), in: :parallel do |host|
       procinfo = capture('cat /proc/cpuinfo')
@@ -49,6 +51,7 @@ namespace :stats do
     end
   end
 
+  desc 'Print remote server memory information'
   task :meminfo do
     on roles(:all), in: :parallel do |host|
       meminfo = capture('cat /proc/meminfo')
@@ -58,6 +61,7 @@ namespace :stats do
 end
 
 namespace :provision do
+  desc 'Provision remote server packages'
   task :packages do
     on roles(:all), in: :parallel do
       execute :sudo, 'apt-get -q -y update'
@@ -66,6 +70,7 @@ namespace :provision do
     end
   end
 
+  desc 'Provision remote server Ruby Version Manager'
   task :rvm do
     on roles(:app), in: :parallel do
       execute '\curl -sSL https://get.rvm.io | bash'
@@ -74,6 +79,7 @@ namespace :provision do
     end
   end
 
+  desc 'Provision remote server Github SSH private key'
   task :github_ssh do
     on roles(:app), in: :parallel do
       set :github_ssk_key, ask('Enter path to Github  SSH key:', `echo $HOME/.ssh/github_rsa`.chomp)
@@ -83,6 +89,7 @@ namespace :provision do
     end
   end
 
+  desc 'Provision remote server - all tasks'
   task :all do
     on roles(:all), in: :parallel do
       invoke 'provision:packages'
@@ -94,6 +101,7 @@ end
 
 namespace :deploy do
   namespace :db do
+    desc 'Database initial setup'
     task :setup do
       on roles(:db), in: :parallel do
         info '[deploy:db:setup] Run `rake db:setup`'
